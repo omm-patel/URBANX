@@ -62,7 +62,7 @@ const ProductDetail = () => {
     );
   }
 
-  const productImage = product.image || product.image_url || "";
+  const productImage = product.image_url || "";
 
   const handleAdd = () => {
     addItem(
@@ -70,7 +70,6 @@ const ProductDetail = () => {
         id: product.id,
         name: product.name,
         price: product.price,
-        image: productImage,
         image_url: productImage,
         slug: product.slug,
         category: product.category,

@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+
+type ProductRow = Tables<"products">;
 
 const AdminProducts = () => {
   const { user, loading } = useAuth();
 
   const ADMIN_EMAIL = "om07674@gmail.com";
 
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductRow[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [product, setProduct] = useState({
@@ -18,7 +21,7 @@ const AdminProducts = () => {
     slug: "",
     category: "t-shirts",
     price: "",
-    image: "",
+    image_url: "",
     description: "",
     featured: false,
   });
@@ -62,7 +65,7 @@ const AdminProducts = () => {
       slug: "",
       category: "t-shirts",
       price: "",
-      image: "",
+      image_url: "",
       description: "",
       featured: false,
     });
@@ -78,7 +81,7 @@ const AdminProducts = () => {
       slug: product.slug,
       category: product.category,
       price: Number(product.price),
-      image: product.image,
+      image_url: product.image_url,
       description: product.description,
       featured: product.featured,
     };
@@ -86,9 +89,9 @@ const AdminProducts = () => {
     const { error } = editingId
       ? await supabase
         .from("products")
-        .update(productData as any)
+        .update(productData)
         .eq("id", editingId)
-      : await supabase.from("products").insert(productData as any);
+      : await supabase.from("products").insert(productData);
 
     if (error) {
       toast.error(error.message);
@@ -104,7 +107,7 @@ const AdminProducts = () => {
     }
   };
 
-  const handleEditProduct = (p: any) => {
+  const handleEditProduct = (p: ProductRow) => {
     setEditingId(p.id);
 
     setProduct({
@@ -112,7 +115,7 @@ const AdminProducts = () => {
       slug: p.slug || "",
       category: p.category || "t-shirts",
       price: String(p.price || ""),
-      image: p.image || "",
+      image_url: p.image_url || "",
       description: p.description || "",
       featured: p.featured || false,
     });
@@ -219,17 +222,17 @@ const AdminProducts = () => {
           <input
             type="text"
             placeholder="Image URL"
-            value={product.image}
+            value={product.image_url}
             onChange={(e) =>
-              setProduct({ ...product, image: e.target.value })
+              setProduct({ ...product, image_url: e.target.value })
             }
             className="w-full rounded-md border px-4 py-3"
             required
           />
 
-          {product.image && (
+          {product.image_url && (
             <img
-              src={product.image}
+              src={product.image_url}
               alt="Product preview"
               className="h-56 w-full rounded-xl object-cover"
             />
@@ -281,7 +284,7 @@ const AdminProducts = () => {
                   className="overflow-hidden rounded-2xl border bg-background shadow-sm transition hover:shadow-md"
                 >
                   <img
-                    src={p.image}
+                    src={p.image_url}
                     alt={p.name}
                     className="h-72 w-full object-contain bg-secondary/30 p-3"
                   />

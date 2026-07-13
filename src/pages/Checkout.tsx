@@ -22,6 +22,30 @@ const Field = ({
   </label>
 );
 
+type OrderInsertWithEmail = {
+  user_id: string;
+  customer_email?: string | null;
+  total: number;
+  status: string;
+  shipping_full_name: string;
+  shipping_address: string;
+  shipping_city: string;
+  shipping_postal_code: string;
+  shipping_country: string;
+  shipping_phone: string;
+};
+
+type OrderItemSnapshotInsert = {
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+  size: string | null;
+  name: string;
+  image?: string;
+  price: number;
+};
+
 const Checkout = () => {
   const { items, total, clear } = useCart();
   const { user } = useAuth();
@@ -101,20 +125,22 @@ const Checkout = () => {
 
     try {
       // 1. Create order
+      const orderData: OrderInsertWithEmail = {
+        user_id: user.id,
+        customer_email: user.email,
+        total,
+        status: "pending",
+        shipping_full_name: form.full_name,
+        shipping_address: form.address,
+        shipping_city: form.city,
+        shipping_postal_code: form.postal_code,
+        shipping_country: form.country,
+        shipping_phone: form.phone,
+      };
+
       const { data: order, error: orderErr } = await supabase
         .from("orders")
-        .insert({
-          user_id: user.id,
-          customer_email: user.email,
-          total,
-          status: "pending",
-          shipping_full_name: form.full_name,
-          shipping_address: form.address,
-          shipping_city: form.city,
-          shipping_postal_code: form.postal_code,
-          shipping_country: form.country,
-          shipping_phone: form.phone,
-        } as any)
+        .insert(orderData as never)
         .select()
         .single();
 
@@ -128,19 +154,19 @@ const Checkout = () => {
       }
 
       // 2. Insert order items with product details
-      const { error: itemsErr } = await supabase.from("order_items").insert(
-        items.map((i) => ({
-          order_id: order.id,
-          product_id: i.id,
-          quantity: i.quantity,
-          unit_price: i.price,
-          size: i.size || null,
+      const orderItemsData: OrderItemSnapshotInsert[] = items.map((i) => ({
+        order_id: order.id,
+        product_id: i.id,
+        quantity: i.quantity,
+        unit_price: i.price,
+        size: i.size || null,
+        name: i.name,
+        image: i.image_url,
+        price: i.price,
+      }));
 
-          // Needed for My Orders page
-          name: i.name,
-          image: i.image,
-          price: i.price,
-        })) as any
+      const { error: itemsErr } = await supabase.from("order_items").insert(
+        orderItemsData as never
       );
 
       if (itemsErr) {

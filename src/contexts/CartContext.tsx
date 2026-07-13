@@ -1,10 +1,9 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 export interface CartItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
-  image?: string;
   image_url?: string;
   slug?: string;
   size?: string;
@@ -14,8 +13,8 @@ export interface CartItem {
 interface CartContextValue {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">, qty?: number) => void;
-  removeItem: (id: number, size?: string) => void;
-  updateQty: (id: number, qty: number, size?: string) => void;
+  removeItem: (id: string, size?: string) => void;
+  updateQty: (id: string, qty: number, size?: string) => void;
   clear: () => void;
   total: number;
   count: number;

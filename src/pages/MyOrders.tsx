@@ -4,10 +4,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
+type Order = {
+  id: string;
+  created_at: string;
+  status: string;
+  total: number;
+};
+
+type OrderItem = {
+  id: string;
+  order_id: string;
+  image?: string | null;
+  name?: string | null;
+  price?: number | null;
+  quantity: number;
+  size?: string | null;
+  unit_price: number;
+};
+
 const MyOrders = () => {
   const { user } = useAuth();
-  const [orders, setOrders] = useState<any[]>([]);
-  const [orderItems, setOrderItems] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
@@ -25,7 +43,7 @@ const MyOrders = () => {
       if (error) {
         alert(error.message);
       } else {
-        setOrders(data || []);
+        setOrders((data || []) as unknown as Order[]);
       }
 
       // fetch order items
@@ -34,7 +52,7 @@ const MyOrders = () => {
         .select("*");
 
       if (!itemsError) {
-        setOrderItems(itemsData || []);
+        setOrderItems((itemsData || []) as unknown as OrderItem[]);
       }
     };
 

@@ -3,13 +3,35 @@ import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+type Order = {
+    id: string;
+    created_at: string;
+    customer_email?: string | null;
+    shipping_address?: string | null;
+    shipping_full_name?: string | null;
+    shipping_phone?: string | null;
+    status: string;
+    total: number;
+};
+
+type OrderItem = {
+    id: string;
+    order_id: string;
+    image?: string | null;
+    name?: string | null;
+    price?: number | null;
+    quantity: number;
+    size?: string | null;
+    unit_price: number;
+};
+
 const AdminOrders = () => {
     const { user, loading } = useAuth();
 
     const ADMIN_EMAIL = "om07674@gmail.com"; // change this
 
-    const [orders, setOrders] = useState<any[]>([]);
-    const [orderItems, setOrderItems] = useState<any[]>([]);
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
     const [selectedUserEmail, setSelectedUserEmail] = useState("");
 
     useEffect(() => {
@@ -20,7 +42,7 @@ const AdminOrders = () => {
                 .order("created_at", { ascending: false });
 
             if (!ordersError) {
-                setOrders(ordersData || []);
+                setOrders((ordersData || []) as unknown as Order[]);
             }
 
             const { data: itemsData, error: itemsError } = await supabase
@@ -28,7 +50,7 @@ const AdminOrders = () => {
                 .select("*");
 
             if (!itemsError) {
-                setOrderItems(itemsData || []);
+                setOrderItems((itemsData || []) as unknown as OrderItem[]);
             }
         };
 
@@ -51,7 +73,11 @@ const AdminOrders = () => {
     };
 
     const customers = Array.from(
-        new Set(orders.map((order) => order.customer_email).filter(Boolean))
+        new Set(
+            orders
+                .map((order) => order.customer_email)
+                .filter((email): email is string => Boolean(email))
+        )
     );
 
     const filteredOrders = selectedUserEmail

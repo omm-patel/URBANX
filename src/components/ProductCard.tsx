@@ -1,21 +1,24 @@
 import { Link } from "react-router-dom";
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
-  image?: string;
   image_url?: string;
   category: string;
-  slug?: string; // 👈 IMPORTANT
   created_at?: string;
+  description?: string;
+  featured?: boolean;
+  slug?: string;
+  stock?: number;
 }
 
 export const ProductCard = ({ product }: { product: Product }) => {
-  const productImage = product.image || product.image_url || "";
+  const productImage = product.image_url || "";
+  const productPath = product.slug ? `/product/${product.slug}` : "/shop";
 
   return (
-    <Link to={`/product/${product.slug}`} className="group block animate-fade-up">
+    <Link to={productPath} className="group block animate-fade-up">
       <div className="aspect-[4/5] overflow-hidden bg-muted">
         <img
           src={productImage}
@@ -39,7 +42,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
           </h3>
         </div>
         <p className="font-serif text-lg">
-          ₹{product.price.toLocaleString("en-IN")}
+          Rs. {product.price.toLocaleString("en-IN")}
         </p>
       </div>
     </Link>
